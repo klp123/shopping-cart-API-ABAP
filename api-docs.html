@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopping Cart API — Documentation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f2240 100%);
+      border-bottom: 1px solid #1e40af33;
+      padding: 32px 40px;
+    }
+    header h1 { font-size: 28px; font-weight: 700; color: #fff; }
+    header p  { margin-top: 6px; color: #93c5fd; font-size: 14px; }
+    .base-url {
+      display: inline-block;
+      margin-top: 14px;
+      background: #0f2240;
+      border: 1px solid #1e40af;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #60a5fa;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    /* ── Auth note ── */
+    .auth-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-left: 4px solid #f59e0b;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 36px;
+      font-size: 13.5px;
+      color: #fde68a;
+    }
+    .auth-banner .icon { font-size: 20px; }
+
+    /* ── Section heading ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    /* ── Endpoint card ── */
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #334155; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 22px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .card-header:hover { background: #1e293b44; }
+
+    /* Method badges */
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      min-width: 60px;
+      text-align: center;
+    }
+    .GET    { background: #064e3b; color: #6ee7b7; border: 1px solid #10b98133; }
+    .POST   { background: #1e3a5f; color: #93c5fd; border: 1px solid #3b82f633; }
+    .PUT    { background: #451a03; color: #fbbf24; border: 1px solid #f59e0b33; }
+    .DELETE { background: #450a0a; color: #fca5a5; border: 1px solid #ef444433; }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #e2e8f0;
+      flex: 1;
+    }
+    .endpoint-desc {
+      font-size: 12.5px;
+      color: #64748b;
+    }
+
+    .auth-chip {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #292524;
+      color: #fbbf24;
+      border: 1px solid #f59e0b44;
+    }
+    .no-auth-chip {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: #14532d22;
+      color: #6ee7b7;
+      border: 1px solid #10b98133;
+    }
+
+    /* Expandable body */
+    .card-body {
+      display: none;
+      padding: 0 22px 20px;
+      border-top: 1px solid #1e293b;
+    }
+    .card-body.open { display: block; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .box-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    pre {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #c9d1d9;
+    }
+
+    .key   { color: #79c0ff; }
+    .str   { color: #a5d6ff; }
+    .num   { color: #ffa657; }
+    .bool  { color: #ff7b72; }
+    .null  { color: #8b949e; }
+    .cmnt  { color: #8b949e; font-style: italic; }
+
+    /* Query params table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 16px;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #0d1117;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    td {
+      padding: 9px 12px;
+      border-top: 1px solid #1e293b;
+      color: #cbd5e1;
+      vertical-align: top;
+    }
+    td code {
+      font-family: 'Courier New', monospace;
+      background: #0d1117;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #79c0ff;
+      font-size: 11.5px;
+    }
+    .optional { color: #94a3b8; font-style: italic; }
+    .required-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      background: #450a0a44;
+      color: #fca5a5;
+      border-radius: 4px;
+      border: 1px solid #ef444422;
+    }
+    .opt-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      background: #1e293b;
+      color: #64748b;
+      border-radius: 4px;
+      border: 1px solid #334155;
+    }
+
+    .chevron {
+      color: #475569;
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+    .chevron.open { transform: rotate(90deg); }
+
+    .status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .status-chip {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .s200 { background: #064e3b44; color: #6ee7b7; border: 1px solid #10b98133; }
+    .s201 { background: #1e3a5f44; color: #93c5fd; border: 1px solid #3b82f633; }
+    .s400 { background: #451a0344; color: #fbbf24; border: 1px solid #f59e0b33; }
+    .s401 { background: #450a0a44; color: #fca5a5; border: 1px solid #ef444433; }
+    .s404 { background: #2d1b6944; color: #c4b5fd; border: 1px solid #7c3aed33; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛒 Shopping Cart API</h1>
+  <p>RESTful API for the ABAP Shopping Cart POC — JWT-secured endpoints</p>
+  <div class="base-url">Base URL: http://localhost:3000/api/v1</div>
+</header>
+
+<div class="container">
+
+  <div class="auth-banner">
+    <span class="icon">🔑</span>
+    <div>
+      All endpoints except <strong>POST /auth/login</strong> require an
+      <code style="background:#0f2240;padding:2px 6px;border-radius:4px;color:#60a5fa;">Authorization: Bearer &lt;token&gt;</code>
+      header. Obtain the token from the login endpoint first.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       AUTH
+  ══════════════════════════════════════════════════════ -->
+  <div class="section-title">Authentication</div>
+
+  <!-- Login -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge POST">POST</span>
+      <span class="endpoint-path">/auth/login</span>
+      <span class="endpoint-desc">Authenticate and receive a JWT</span>
+      <span class="no-auth-chip">No Auth</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div>
+          <div class="box-label">Request Body</div>
+          <pre><span class="cmnt">// Content-Type: application/json</span>
+{
+  <span class="key">"email"</span>:    <span class="str">"user@example.com"</span>,  <span class="cmnt">// required, valid email</span>
+  <span class="key">"password"</span>: <span class="str">"secure-password"</span>    <span class="cmnt">// required</span>
+}</pre>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre>{
+  <span class="key">"token"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5..."</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s400">400 Validation Error</span>
+            <span class="status-chip s401">401 Invalid Credentials</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       PRODUCTS
+  ══════════════════════════════════════════════════════ -->
+  <div class="section-title">Products</div>
+
+  <!-- GET products -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge GET">GET</span>
+      <span class="endpoint-path">/products</span>
+      <span class="endpoint-desc">Fetch product catalogue from SAP OData</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="box-label" style="margin-top:16px">Query Parameters</div>
+      <table>
+        <tr><th>Param</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td><code>category</code></td><td>string</td><td><span class="opt-tag">optional</span></td><td>Filter by product category (e.g. <code>Electronics</code>)</td></tr>
+        <tr><td><code>minPrice</code></td><td>number</td><td><span class="opt-tag">optional</span></td><td>Minimum price filter</td></tr>
+        <tr><td><code>maxPrice</code></td><td>number</td><td><span class="opt-tag">optional</span></td><td>Maximum price filter</td></tr>
+        <tr><td><code>limit</code></td><td>number</td><td><span class="opt-tag">optional</span></td><td>Max records to return (<code>$top</code>) — UI defaults to 8</td></tr>
+        <tr><td><code>skip</code></td><td>number</td><td><span class="opt-tag">optional</span></td><td>Records to skip (<code>$skip</code>) for pagination</td></tr>
+      </table>
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Example Request</div>
+          <pre>GET /api/v1/products?limit=8&amp;skip=0&amp;category=Electronics
+
+Authorization: Bearer eyJhbGci...</pre>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre>{
+  <span class="key">"count"</span>: <span class="num">42</span>,
+  <span class="key">"products"</span>: [
+    {
+      <span class="key">"id"</span>:       <span class="num">1</span>,
+      <span class="key">"name"</span>:     <span class="str">"Wireless Headphones"</span>,
+      <span class="key">"price"</span>:    <span class="num">2999</span>,
+      <span class="key">"category"</span>: <span class="str">"Electronics"</span>,
+      <span class="key">"stock"</span>:    <span class="num">15</span>
+    }
+  ]
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       CART
+  ══════════════════════════════════════════════════════ -->
+  <div class="section-title">Cart</div>
+
+  <!-- GET cart -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge GET">GET</span>
+      <span class="endpoint-path">/cart/<span style="color:#f472b6">:sessionId</span></span>
+      <span class="endpoint-desc">Return cart with totals</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="box-label" style="margin-top:16px">Path Parameters</div>
+      <table>
+        <tr><th>Param</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td><code>sessionId</code></td><td>string</td><td><span class="required-tag">required</span></td><td>Unique cart session identifier</td></tr>
+      </table>
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Example Request</div>
+          <pre>GET /api/v1/cart/sess-1714600000-abc123
+
+Authorization: Bearer eyJhbGci...</pre>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre>{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-1714600000-abc123"</span>,
+  <span class="key">"items"</span>: [
+    {
+      <span class="key">"itemId"</span>:   <span class="str">"item-uuid"</span>,
+      <span class="key">"productId"</span>: <span class="str">"prod-001"</span>,
+      <span class="key">"name"</span>:      <span class="str">"Wireless Headphones"</span>,
+      <span class="key">"price"</span>:     <span class="num">2999</span>,
+      <span class="key">"quantity"</span>:  <span class="num">2</span>,
+      <span class="key">"lineTotal"</span>: <span class="num">5998</span>
+    }
+  ],
+  <span class="key">"subtotal"</span>:  <span class="num">5998</span>,
+  <span class="key">"discount"</span>:  <span class="num">0</span>,
+  <span class="key">"total"</span>:     <span class="num">5998</span>,
+  <span class="key">"coupon"</span>:    <span class="null">null</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST add item -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge POST">POST</span>
+      <span class="endpoint-path">/cart/<span style="color:#f472b6">:sessionId</span>/items</span>
+      <span class="endpoint-desc">Add a product to the cart</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Request Body</div>
+          <pre><span class="cmnt">// Content-Type: application/json</span>
+{
+  <span class="key">"productId"</span>: <span class="str">"prod-001"</span>,   <span class="cmnt">// required, non-empty string</span>
+  <span class="key">"name"</span>:      <span class="str">"Wireless Headphones"</span>, <span class="cmnt">// required</span>
+  <span class="key">"price"</span>:     <span class="num">2999</span>,          <span class="cmnt">// required, positive number</span>
+  <span class="key">"quantity"</span>:  <span class="num">2</span>              <span class="cmnt">// required, int 1–10</span>
+}</pre>
+        </div>
+        <div>
+          <div class="box-label">Response — 201 Created</div>
+          <pre><span class="cmnt">// Returns the full updated cart (same shape as GET /cart/:sessionId)</span>
+{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-..."</span>,
+  <span class="key">"items"</span>:     [...],
+  <span class="key">"subtotal"</span>:  <span class="num">5998</span>,
+  <span class="key">"discount"</span>:  <span class="num">0</span>,
+  <span class="key">"total"</span>:     <span class="num">5998</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s201">201 Created</span>
+            <span class="status-chip s400">400 Validation Error</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUT update qty -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge PUT">PUT</span>
+      <span class="endpoint-path">/cart/<span style="color:#f472b6">:sessionId</span>/items/<span style="color:#f472b6">:itemId</span></span>
+      <span class="endpoint-desc">Update quantity of a cart item</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Request Body</div>
+          <pre><span class="cmnt">// Content-Type: application/json</span>
+{
+  <span class="key">"quantity"</span>: <span class="num">3</span>   <span class="cmnt">// required, int 1–10</span>
+}</pre>
+          <div class="box-label" style="margin-top:14px">Path Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Description</th></tr>
+            <tr><td><code>sessionId</code></td><td>Cart session ID</td></tr>
+            <tr><td><code>itemId</code></td><td>Cart item UUID (from GET cart response)</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre><span class="cmnt">// Returns the full updated cart</span>
+{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-..."</span>,
+  <span class="key">"items"</span>:     [...],
+  <span class="key">"subtotal"</span>:  <span class="num">8997</span>,
+  <span class="key">"discount"</span>:  <span class="num">0</span>,
+  <span class="key">"total"</span>:     <span class="num">8997</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s400">400 Validation Error</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+            <span class="status-chip s404">404 Item Not Found</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE remove item -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge DELETE">DEL</span>
+      <span class="endpoint-path">/cart/<span style="color:#f472b6">:sessionId</span>/items/<span style="color:#f472b6">:itemId</span></span>
+      <span class="endpoint-desc">Remove a single item from the cart</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Path Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Description</th></tr>
+            <tr><td><code>sessionId</code></td><td>Cart session ID</td></tr>
+            <tr><td><code>itemId</code></td><td>Cart item UUID to remove</td></tr>
+          </table>
+          <div style="margin-top:10px;color:#64748b;font-size:12.5px">No request body required.</div>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre><span class="cmnt">// Returns the full updated cart (item removed)</span>
+{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-..."</span>,
+  <span class="key">"items"</span>:     [...],
+  <span class="key">"subtotal"</span>:  <span class="num">2999</span>,
+  <span class="key">"total"</span>:     <span class="num">2999</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+            <span class="status-chip s404">404 Item Not Found</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST coupon -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge POST">POST</span>
+      <span class="endpoint-path">/cart/<span style="color:#f472b6">:sessionId</span>/coupon</span>
+      <span class="endpoint-desc">Apply a discount coupon code</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Request Body</div>
+          <pre><span class="cmnt">// Content-Type: application/json</span>
+{
+  <span class="key">"code"</span>: <span class="str">"SAVE10"</span>   <span class="cmnt">// required, non-empty string</span>
+}</pre>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre><span class="cmnt">// Returns cart with discount applied</span>
+{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-..."</span>,
+  <span class="key">"items"</span>:     [...],
+  <span class="key">"subtotal"</span>:  <span class="num">5998</span>,
+  <span class="key">"discount"</span>:  <span class="num">500</span>,
+  <span class="key">"total"</span>:     <span class="num">5498</span>,
+  <span class="key">"coupon"</span>:    <span class="str">"SAVE10"</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s400">400 Invalid Coupon</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE clear cart -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge DELETE">DEL</span>
+      <span class="endpoint-path">/cart/<span style="color:#f472b6">:sessionId</span></span>
+      <span class="endpoint-desc">Clear all items from the cart</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Path Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Description</th></tr>
+            <tr><td><code>sessionId</code></td><td>Cart session ID to clear</td></tr>
+          </table>
+          <div style="margin-top:10px;color:#64748b;font-size:12.5px">No request body required.</div>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre>{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-..."</span>,
+  <span class="key">"items"</span>:     [],
+  <span class="key">"subtotal"</span>:  <span class="num">0</span>,
+  <span class="key">"discount"</span>:  <span class="num">0</span>,
+  <span class="key">"total"</span>:     <span class="num">0</span>,
+  <span class="key">"coupon"</span>:    <span class="null">null</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       ORDERS
+  ══════════════════════════════════════════════════════ -->
+  <div class="section-title">Orders</div>
+
+  <!-- POST create order -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge POST">POST</span>
+      <span class="endpoint-path">/orders</span>
+      <span class="endpoint-desc">Create an order from the current cart</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Request Body</div>
+          <pre><span class="cmnt">// Content-Type: application/json</span>
+{
+  <span class="key">"sessionId"</span>: <span class="str">"sess-1714600000-abc123"</span>, <span class="cmnt">// required</span>
+  <span class="key">"userId"</span>:    <span class="str">"user-1"</span>                  <span class="cmnt">// required</span>
+}</pre>
+        </div>
+        <div>
+          <div class="box-label">Response — 201 Created</div>
+          <pre>{
+  <span class="key">"orderId"</span>:   <span class="str">"order-uuid"</span>,
+  <span class="key">"userId"</span>:    <span class="str">"user-1"</span>,
+  <span class="key">"status"</span>:    <span class="str">"confirmed"</span>,
+  <span class="key">"items"</span>:     [...],
+  <span class="key">"subtotal"</span>:  <span class="num">5998</span>,
+  <span class="key">"discount"</span>:  <span class="num">0</span>,
+  <span class="key">"total"</span>:     <span class="num">5998</span>,
+  <span class="key">"createdAt"</span>: <span class="str">"2026-05-02T10:30:00.000Z"</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s201">201 Created</span>
+            <span class="status-chip s400">400 Empty Cart / Validation</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GET order -->
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span class="badge GET">GET</span>
+      <span class="endpoint-path">/orders/<span style="color:#f472b6">:orderId</span></span>
+      <span class="endpoint-desc">Retrieve full order detail</span>
+      <span class="auth-chip">🔒 Bearer</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Path Parameters</div>
+          <table>
+            <tr><th>Param</th><th>Description</th></tr>
+            <tr><td><code>orderId</code></td><td>Order UUID returned from POST /orders</td></tr>
+          </table>
+          <div style="margin-top:10px;color:#64748b;font-size:12.5px">No request body required.</div>
+        </div>
+        <div>
+          <div class="box-label">Response — 200 OK</div>
+          <pre>{
+  <span class="key">"orderId"</span>:   <span class="str">"order-uuid"</span>,
+  <span class="key">"userId"</span>:    <span class="str">"user-1"</span>,
+  <span class="key">"status"</span>:    <span class="str">"confirmed"</span>,
+  <span class="key">"items"</span>: [
+    {
+      <span class="key">"productId"</span>: <span class="str">"prod-001"</span>,
+      <span class="key">"name"</span>:      <span class="str">"Wireless Headphones"</span>,
+      <span class="key">"price"</span>:     <span class="num">2999</span>,
+      <span class="key">"quantity"</span>:  <span class="num">2</span>,
+      <span class="key">"lineTotal"</span>: <span class="num">5998</span>
+    }
+  ],
+  <span class="key">"subtotal"</span>:  <span class="num">5998</span>,
+  <span class="key">"discount"</span>:  <span class="num">0</span>,
+  <span class="key">"total"</span>:     <span class="num">5998</span>,
+  <span class="key">"createdAt"</span>: <span class="str">"2026-05-02T10:30:00.000Z"</span>
+}</pre>
+          <div class="status-row">
+            <span class="status-chip s200">200 OK</span>
+            <span class="status-chip s401">401 Unauthorized</span>
+            <span class="status-chip s404">404 Not Found</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       ERROR FORMAT
+  ══════════════════════════════════════════════════════ -->
+  <div class="section-title">Error Response Format</div>
+  <div class="card">
+    <div class="card-header" onclick="toggle(this)">
+      <span style="font-size:13px;color:#64748b">All error responses follow a consistent structure</span>
+      <span class="chevron" style="margin-left:auto">▶</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2" style="margin-top:16px">
+        <div>
+          <div class="box-label">Generic Error (401, 404, 500…)</div>
+          <pre>{
+  <span class="key">"error"</span>: <span class="str">"Invalid or expired token"</span>
+}</pre>
+        </div>
+        <div>
+          <div class="box-label">Validation Error (400)</div>
+          <pre>{
+  <span class="key">"error"</span>: <span class="str">"Validation failed"</span>,
+  <span class="key">"details"</span>: [
+    {
+      <span class="key">"field"</span>:   <span class="str">"price"</span>,
+      <span class="key">"message"</span>: <span class="str">"price must be a positive number"</span>
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  function toggle(header) {
+    const body    = header.nextElementSibling;
+    const chevron = header.querySelector('.chevron');
+    const isOpen  = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+  }
+
+  // Open first card of each section by default
+  document.querySelectorAll('.card:first-of-type .card-header').forEach(h => toggle(h));
+</script>
+</body>
+</html>
