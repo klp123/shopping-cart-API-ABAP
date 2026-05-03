@@ -8,13 +8,18 @@ const router = express.Router();
 /**
  * GET /api/v1/products
  * Fetch products from OData (SAP)
- * Query: ?minPrice=100&limit=5
+ * Query params (all optional):
+ *   ?category=Electronics   — filter by category
+ *   ?minPrice=500           — price greater than value
+ *   ?maxPrice=3000          — price less than value
+ *   ?limit=5                — max number of results ($top)
+ *   ?skip=10                — number of results to skip ($skip)
  */
 router.get('/', async (req, res, next) => {
   try {
-    console.log('hiiiiii')
-    const products = await productService.fetchProductsFromOData(req.query);
-    res.status(200).json(products);
+    const { category, minPrice, maxPrice, limit, skip } = req.query;
+    const { count, products } = await productService.fetchProductsFromOData({ category, minPrice, maxPrice, limit, skip });
+    res.status(200).json({ count, products });
   } catch (err) {
     next(err);
   }
