@@ -1,7 +1,7 @@
 {
   "name": "shopping-cart-api",
   "version": "1.0.0",
-  "description": "POC #2 \u2014 Shopping Cart & Order Management Service",
+  "description": "POC #2 — Shopping Cart & Order Management Service",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,9 +13,12 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "axios": "^1.16.0",
+    "axis": "^1.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.0",
     "uuid": "^9.0.0",
     "zod": "^3.23.8"
   },

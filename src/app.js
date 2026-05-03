@@ -3,9 +3,11 @@
 const express = require('express');
 const cors    = require('cors');
 
-const cartRouter  = require('./routes/cart.routes');
-const orderRouter = require('./routes/order.routes');
-const errorHandler = require('./middleware/errorHandler');
+const cartRouter     = require('./routes/cart.routes');
+const productRouter  = require('./routes/product.routes');
+const orderRouter    = require('./routes/order.routes');
+const authRoutes     = require('./routes/auth.routes');
+const errorHandler   = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -19,8 +21,10 @@ app.get('/health', (_req, res) => {
 });
 
 // ── Routes ───────────────────────────────────────────────────
-app.use('/api/v1/cart',   cartRouter);
-app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/cart',      cartRouter);
+app.use('/api/v1/orders',    orderRouter);
+app.use('/api/v1/products',  productRouter);
+app.use('/api/v1/auth',      authRoutes);
 
 // ── 404 handler ──────────────────────────────────────────────
 app.use((_req, res) => {
