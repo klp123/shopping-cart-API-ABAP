@@ -1,9 +1,12 @@
 'use strict';
 
-const express = require('express');
+const express        = require('express');
 const productService = require('../services/odataService');
+const authenticate   = require('../middleware/authenticate');
 
 const router = express.Router();
+
+router.use(authenticate);
 
 /**
  * GET /api/v1/products

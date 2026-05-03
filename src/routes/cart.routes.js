@@ -2,7 +2,8 @@
 
 const express    = require('express');
 const cartService = require('../services/cartService');
-const validate   = require('../middleware/validate');
+const validate      = require('../middleware/validate');
+const authenticate  = require('../middleware/authenticate');
 const {
   addItemSchema,
   updateQtySchema,
@@ -10,6 +11,8 @@ const {
 } = require('../schemas/cart.schemas');
 
 const router = express.Router();
+
+router.use(authenticate);
 
 /**
  * GET /api/v1/cart/:sessionId

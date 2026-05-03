@@ -3,9 +3,12 @@
 const express       = require('express');
 const orderService  = require('../services/orderService');
 const validate      = require('../middleware/validate');
+const authenticate  = require('../middleware/authenticate');
 const { createOrderSchema } = require('../schemas/order.schemas');
 
 const router = express.Router();
+
+router.use(authenticate);
 
 /**
  * POST /api/v1/orders
