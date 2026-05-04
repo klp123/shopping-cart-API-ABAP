@@ -12,6 +12,7 @@ env:
   ECS_SERVICE: ecs-node-service
   ECS_TASK_DEFINITION: ecs-node
   CONTAINER_NAME: ecs-node
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   deploy:
@@ -56,7 +57,8 @@ jobs:
             .requiresAttributes,
             .compatibilities,
             .registeredAt,
-            .registeredBy
+            .registeredBy,
+            .enableFaultInjection
           )' task-definition.json > cleaned-task-definition.json
 
       - name: Render new task definition
