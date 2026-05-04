@@ -8,7 +8,7 @@
  *   BR-03  Fixed-discount coupon codes only
  *   BR-04  Coupon applied once per session
  *
- * Run: npm run test:unit
+ * Run: npm run test:unit //
  */
 
 const { resetStore } = require('../../src/data/store');
