@@ -10,6 +10,11 @@ const server = app.listen(PORT, () => {
   console.log(`[server] Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
+app.use(cors({
+  origin: 'https://dkz8ljq6oozvy.cloudfront.net',
+  credentials: true
+}));
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('[server] SIGTERM received — shutting down gracefully');
