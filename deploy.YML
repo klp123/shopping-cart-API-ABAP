@@ -1,0 +1,67 @@
+name: Deploy Node App to ECS
+
+on:
+push:
+branches: [ "main" ]
+
+env:
+AWS_REGION: us-east-1
+ECR_REPOSITORY: ecart-node
+ECS_CLUSTER: node-cluster-ecs
+ECS_SERVICE: ecs-node-service
+ECS_TASK_DEFINITION: ecs-node
+CONTAINER_NAME: ecs-node
+
+jobs:
+deploy:
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Checkout source
+    uses: actions/checkout@v4
+
+  - name: Configure AWS credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws-region: ${{ env.AWS_REGION }}
+
+  - name: Login to Amazon ECR
+    id: login-ecr
+    uses: aws-actions/amazon-ecr-login@v2
+
+  - name: Build, tag, and push Docker image
+    id: build-image
+    run: |
+      IMAGE_TAG=${{ github.sha }}
+      IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+
+      docker build -t $IMAGE_URI .
+      docker push $IMAGE_URI
+
+      echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
+
+  - name: Download current task definition
+    run: |
+      aws ecs describe-task-definition \
+        --task-definition ${{ env.ECS_TASK_DEFINITION }} \
+        --query taskDefinition > task-definition.json
+
+  - name: Render new task definition with updated image
+    id: task-def
+    uses: aws-actions/amazon-ecs-render-task-definition@v1
+    with:
+      task-definition: task-definition.json
+      container-name: ${{ env.CONTAINER_NAME }}
+      image: ${{ steps.build-image.outputs.image }}
+
+  - name: Deploy to ECS
+    uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    with:
+      task-definition: ${{ steps.task-def.outputs.task-definition }}
+      service: ${{ env.ECS_SERVICE }}
+      cluster: ${{ env.ECS_CLUSTER }}
+      wait-for-service-stability: true
+```
