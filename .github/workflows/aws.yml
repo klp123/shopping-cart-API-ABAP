@@ -2,7 +2,8 @@ name: Deploy Node App to ECS
 
 on:
 push:
-branches: [ "main" ]
+branches:
+- main
 
 env:
 AWS_REGION: us-east-1
@@ -15,7 +16,6 @@ CONTAINER_NAME: ecs-node
 jobs:
 deploy:
 runs-on: ubuntu-latest
-
 
 steps:
   - name: Checkout source
