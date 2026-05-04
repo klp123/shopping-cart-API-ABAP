@@ -43,7 +43,7 @@ router.post('/:sessionId/items', validate(addItemSchema), (req, res, next) => {
 
 /**
  * PUT /api/v1/cart/:sessionId/items/:itemId
- * FR02 — Update quantity of a cart item.
+ * FR02 — Update the quantity of a cart item.
  * Body: { quantity }
  */
 router.put('/:sessionId/items/:itemId', validate(updateQtySchema), (req, res, next) => {
