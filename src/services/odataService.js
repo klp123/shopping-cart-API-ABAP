@@ -1,6 +1,6 @@
 
 const axios = require("axios");
-const BASE_URL = "http://localhost:4000/odata";
+const BASE_URL = "http://23.474.3227.22:4000/odata";
 
 async function fetchProductsFromOData(query) {
   const filters = [];
@@ -14,11 +14,12 @@ async function fetchProductsFromOData(query) {
   if (query && query.limit) params['$top']    = query.limit;
   if (query && query.skip)  params['$skip']   = query.skip;
 
-  const res = await axios.get(`${BASE_URL}/Products`, { params });
-  return {
-    count: res.data['@odata.count'],
-    products: res.data.value,
-  };
+  // const res =
+  // await axios.get(`${BASE_URL}/Products`, { params });
+  // return {
+  //   count: res.data['@odata.count'],
+  //   products: res.data.value,
+  // };
 }
 
 module.exports = { fetchProductsFromOData };
