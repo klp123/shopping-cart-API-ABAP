@@ -4,7 +4,7 @@
  * Unit Tests — CartService
  *
  * TDD Coverage:
- *   BR-01  Max 10 units per cart line item
+ *   BR-01  Max 10 units per the cart line item
  *   BR-03  Fixed-discount coupon codes only
  *   BR-04  Coupon applied once per session
  *
