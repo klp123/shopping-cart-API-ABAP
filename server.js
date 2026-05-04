@@ -2,6 +2,7 @@
 
 require('dotenv').config();
 const app = require('./src/app');
+const cors = require('cors');
 
 const PORT = process.env.PORT || 3000;
 
@@ -12,6 +13,7 @@ const server = app.listen(PORT, () => {
 
 app.use(cors({
   origin: 'https://dkz8ljq6oozvy.cloudfront.net',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 
